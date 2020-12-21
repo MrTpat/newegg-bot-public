@@ -13,9 +13,12 @@ def loadCookies() -> dict:
             newCookies = json.load(fh)
             return newCookies
 
-def addToCart(p_id: str, cookies: dict) -> bool:
+def addToCart(p_id: str, cookies: dict, isCombo: bool) -> bool:
     try:
-        add = requests.get('https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=' + p_id, cookies=cookies)
+        if isCombo:
+            add = requests.get('https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=Combo.' + p_id, cookies=cookies)
+        else:
+            add = requests.get('https://secure.newegg.com/Shopping/AddtoCart.aspx?Submit=ADD&ItemList=' + p_id, cookies=cookies)
     except:
         colors.printFail("Failed to add to cart, IP block?")
         time.sleep(2)
@@ -23,18 +26,21 @@ def addToCart(p_id: str, cookies: dict) -> bool:
     if p_id not in add.url: #fail
         colors.printFail("Couldn't add to cart, retrying in 1 sec")
         time.sleep(2)
-        return addToCart(p_id, cookies)
+        return addToCart(p_id, cookies, isCombo)
     else:
         colors.printInfo("Added to cart")
         return True
 
-def genDataString(s_id: str) -> str:
-    rawMid = '{"SaleType":1,"ItemGroup":1,"ItemNumber":"' + s_id + '","OptionalInfos":[]}'
-    encryptedBytes = base64.standard_b64encode(str.encode(rawMid)).decode()
-    data = '{"ItemList":[{"ItemNumber":"' + s_id + '","ItemKey":"' + encryptedBytes + '","Quantity":1}],"Actions":[]}'
-    return data
+def genDataString(p_id: str, s_id: str, isCombo: bool) -> str:
+    if not isCombo:
+        rawMid = '{"SaleType":1,"ItemGroup":1,"ItemNumber":"' + s_id + '","OptionalInfos":[]}'
+        encryptedBytes = base64.standard_b64encode(str.encode(rawMid)).decode()
+    else:
+        rawMid = '{"SaleType":1,"ItemGroup":3,"ItemNumber":"' + p_id + '","OptionalInfos":[]}'
+        encryptedBytes = base64.standard_b64encode(str.encode(rawMid)).decode()
+    return '{"ItemList":[{"ItemNumber":"' + s_id + '","ItemKey":"' + encryptedBytes + '","Quantity":1}],"Actions":[]}'
 
-def genSessionID(cookies: dict, s_id: str) -> str:
+def genSessionID(cookies: dict, p_id: str, s_id: str, isCombo: bool) -> str:
     req_url = 'https://secure.newegg.com/shop/api/CheckoutApi'
     headers = {
             'authority': 'secure.newegg.com',
@@ -49,11 +55,11 @@ def genSessionID(cookies: dict, s_id: str) -> str:
             'referer': 'https://secure.newegg.com/shop/cart',
             'accept-language': 'en-US,en;q=0.9'
             }
-    data = genDataString(s_id)
+    data = genDataString(p_id, s_id, isCombo)
     requestObj = requests.post(req_url, headers=headers, cookies=cookies, data=data)
     if requestObj.status_code != 200:
         colors.printFail("ERROR GENERATING SESSION ID, TRYING AGAIN")
-        return genSessionID(cookies, s_id)
+        return genSessionID(cookies, p_id, s_id, isCombo)
     else:
         colors.printInfo("GOT SESSION ID")
         return requestObj.json()['SessionID']
@@ -161,8 +167,8 @@ def submit_order(cookies: dict, s_id: str) -> bool:
         return True
     
 
-def checkout(config: dict, cookies: dict, p_id: str, s_id: str, cvv: str, test: bool) -> bool:
-    sessionId = genSessionID(cookies, s_id)
+def checkout(config: dict, cookies: dict, p_id: str, s_id: str, cvv: str, test: bool, isCombo: bool) -> bool:
+    sessionId = genSessionID(cookies, p_id, s_id, isCombo)
     url = 'https://secure.newegg.com/shop/checkout?sessionId=' + sessionId
     transactionNumber = getTransactionNumber(cookies, sessionId)
     if transactionNumber == None:
@@ -221,15 +227,16 @@ def main(profile: str) -> None:
     config.read('config.ini')
     product_id = config[profile]['primaryId']
     secondary_product_id = config[profile]['secondaryId']
+    isCombo = config[profile]['isCombo'] == 'true'
     cvv = config['CREDENTIALS']['cvv']
     test = False
-    if profile == 'TEST':
+    if profile == 'TEST' or 'COMBOTEST':
         colors.printInfo('Running in test mode (no buying)')
         test = True
     
     while not transactionComplete:
-        if addToCart(product_id, cookies):
-            transactionComplete = checkout(config, cookies, product_id, secondary_product_id, cvv, test)
+        if addToCart(product_id, cookies, isCombo):
+            transactionComplete = checkout(config, cookies, product_id, secondary_product_id, cvv, test, isCombo)
 
 
 if __name__ == "__main__":
