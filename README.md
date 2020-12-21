@@ -23,6 +23,8 @@ The secondary ID is 19-113-666 (make sure to add dashes to the config).
 
 ## ALSO MAKE SURE TO UPDATE YOUR CREDENTIALS AT THE BOTTOM OF THE CONFIG SO THAT THEY MATCH WITH YOUR CARD INFO. THE INFO SHOULD BE TIED TO YOUR PRIMARY CARD IN NEWEGG.
 
+## FOR COMBOS, THE PRIMARY ID IS THE THING AFTER COMBO. IN THE URL. THE SECONDARY ID IS THE PRIMARY ID OF THE HIGHEST-PRICED PRODUCT IN THE COMBO!!!
+
 Once done with the config, run pipenv shell.
 
 To run the scanner for an item, say the 5600X, I would do python scanner.py 5600X.
