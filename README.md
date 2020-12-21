@@ -21,6 +21,8 @@ The secondary ID is found by right-clicking the image in Chrome, inspecting, and
 
 The secondary ID is 19-113-666 (make sure to add dashes to the config).
 
+## ALSO MAKE SURE TO UPDATE YOUR CREDENTIALS AT THE BOTTOM OF THE CONFIG SO THAT THEY MATCH WITH YOUR CARD INFO. THE INFO SHOULD BE TIED TO YOUR PRIMARY CARD IN NEWEGG.
+
 Once done with the config, run pipenv shell.
 
 To run the scanner for an item, say the 5600X, I would do python scanner.py 5600X.
