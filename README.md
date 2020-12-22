@@ -2,7 +2,7 @@
 
 ## THIS BOT CAN CHECKOUT OF NEWEGG IN <4 SECONDS.
 
-## Currently, the interval limit I set is 30 seconds, since newegg bans liberally. To circumvent this, you can run python3 buyBot.py --5600X
+## Currently, the interval limit I set is 30 seconds, since newegg bans liberally. To circumvent this, you can run python3 buyBot.py 5600X
 ## when you know a drop is coming. Run it ~30 seconds before the drop and you should be golden.
 
 Usage:
