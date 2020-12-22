@@ -229,10 +229,9 @@ def main(profile: str) -> None:
     secondary_product_id = config[profile]['secondaryId']
     isCombo = config[profile]['isCombo'] == 'true'
     cvv = config['CREDENTIALS']['cvv']
-    test = False
-    if profile == 'TEST' or 'COMBOTEST':
+    test = profile == 'TEST' or profile == 'COMBOTEST'
+    if test:
         colors.printInfo('Running in test mode (no buying)')
-        test = True
     
     while not transactionComplete:
         if addToCart(product_id, cookies, isCombo):
