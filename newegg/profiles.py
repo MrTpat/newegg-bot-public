@@ -5,7 +5,7 @@ from errors import ImproperSettingsConfig
 
 
 class BillingProfile:
-    def __init__(self, name: str, phone: str, address: str, zip_code: str, state: str, city: str, cvv: str, country: str, country_long: str) -> None:
+    def __init__(self, name: str, phone: str, address: str, zip_code: str, state: str, city: str, cvv: str, country: str, country_long: str, card_provider:  str) -> None:
         self.name: str = name
         self.phone: str = phone
         self.address: str = address
@@ -15,6 +15,7 @@ class BillingProfile:
         self.cvv: str = cvv
         self.country: str = country
         self.country_long: str = country_long
+        self.card_provider: str = card_provider
 
     @staticmethod
     def from_dict(d: dict):
@@ -28,7 +29,8 @@ class BillingProfile:
             cvv = d['city']
             country = d['country']
             country_long = d['country_long']
-            return BillingProfile(name, phone, address, zip_code, state, city, cvv, country, country_long)
+            card_provider = d['card_provider']
+            return BillingProfile(name, phone, address, zip_code, state, city, cvv, country, country_long, card_provider)
         except:
             raise ImproperBillingConfig('Bad billing file')
         

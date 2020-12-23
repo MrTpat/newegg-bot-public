@@ -29,7 +29,8 @@ class Job:
             self.session_id: Optional[str] = None
         
         def reset(self):
-            self.state = State.unstarted
+            self.kill()
+            self.state = self.State.unstarted
         def update(self, transaction_number: Optional[int], session_id: Optional[str]):
             self.state = self.State(self.state.value + 1)
             print(f'New State: {self.state.name}')
@@ -65,7 +66,13 @@ class Job:
         self.validate_address(communicator, state)
 
     def run_real_subroutine(self, communicator: NeweggCommunicator) -> bool:
-        return True
+        state: self.JobState = self.JobState(communicator)
+        self.add_to_cart(communicator, state)
+        self.gen_session_id(communicator, state)
+        self.get_transaction_number(communicator, state)
+        self.submit_card_info(communicator, state)
+        self.validate_address(communicator, state)
+        self.submit_order(communicator, state)
 
     def add_to_cart(self, communicator: NeweggCommunicator, state: JobState) -> None:
         atc_limit = self.settings_profile.atc_limit
@@ -109,10 +116,20 @@ class Job:
 
     def validate_address(self, communicator: NeweggCommunicator, state: JobState) -> None:
         if state.is_alive():
-            address_validate_params = self.billing_profile.__dict__.copy()
-            address_validate_params.update(state.__dict__)
+            state.update(state.transaction_number, state.session_id)
+            address_validate_params = state.__dict__.copy()
+            address_validate_params.update(self.billing_profile.__dict__)
             validate_address_limit = self.settings_profile.validate_address_limit
-            if universal_function_limiter(communicator.validate_address, validate_address_limit, address_validate_params, False):
+            if not universal_function_limiter(communicator.validate_address, validate_address_limit, address_validate_params, False):
+                state.kill()
+            else:
+                state.update(state.transaction_number, state.session_id)
+
+    def submit_order(self, communicator: NeweggCommunicator, state: JobState) -> None:
+        if state.is_alive():
+            state.update(state.transaction_number, state.session_id)
+            submit_order_limit = self.settings_profile.submit_order_limit
+            if not universal_function_limiter(communicator.submit_order, submit_order_limit, state.__dict__, False):
                 state.kill()
             else:
                 state.update(state.transaction_number, state.session_id)
