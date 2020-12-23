@@ -1,0 +1,8 @@
+{
+  "atc_limit": 500,
+  "gen_session_id_limit": 10,
+  "get_transaction_number_limit": 10,
+  "submit_card_info_limit": 10,
+  "validate_address_limit": 10,
+  "timeout": 3
+}
