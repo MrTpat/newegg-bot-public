@@ -9,3 +9,7 @@ class ImproperProductConfig(Exception):
 class ImproperSettingsConfig(Exception):
     def __init__(self, err):
         self.err = err
+
+class ImproperJobsConfig(Exception):
+    def __init__(self, err):
+        self.err = err

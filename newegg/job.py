@@ -1,64 +1,118 @@
-from communicator import NeweggCommunicator
-from profiles import BillingProfile
-from profiles import ProductProfile
-from profiles import SettingsProfile
-from util import universal_function_limiter
+from .communicator import NeweggCommunicator
+from .profiles import BillingProfile
+from .profiles import ProductProfile
+from .profiles import SettingsProfile
+from .util import universal_function_limiter
+from .util import gather_cookies
+from .errors import ImproperJobsConfig
 from enum import Enum
 from typing import Optional
+import threading
+import json
 
-class Job:
-    class JobState:
-        class State(Enum):
-            failed = -1
-            unstarted = 0
-            trying_to_add_to_cart = 1
-            added_to_cart = 2
-            generating_session_id = 3
-            generated_session_id = 4
-            getting_transaction_number = 5
-            got_transaction_number = 6
-            submitting_card_info = 7
-            submitted_card_info = 8
-            validating_address = 9
-            validated_address = 10
-            completed = 11
-        
-        def __init__(self, communicator):
-            self.state: self.State = self.State.unstarted
-            self.transaction_number: Optional[int] = None
-            self.session_id: Optional[str] = None
-        
-        def reset(self):
-            self.kill()
-            self.state = self.State.unstarted
-        def update(self, transaction_number: Optional[int], session_id: Optional[str]):
-            self.state = self.State(self.state.value + 1)
-            print(f'New State: {self.state.name}')
-            self.transaction_number = transaction_number
-            self.session_id = session_id
-        def kill(self):
-            print(f'killed @ {self.state.name}')
-            self.state = self.State.failed
-            self.transaction_number = None
-            self.session_id = None
-        def is_alive(self):
-            return self.state != self.State.failed
+class JobQueue:
+    def __init__(self, jobs: list) -> None:
+        self.jobs = jobs
+        self.real = False
 
-    def __init__(self, billing_config_file: str, product_config_file: str, settings_config_file: str) -> None:
+    def set_real(self, real: bool) -> None:
+        self.real = real
+
+    def run(self) -> None:
+        for job in self.jobs:
+            job.real = self.real
+            job.start()
+
+    @staticmethod
+    def from_config_file(fl: str):
+        try:
+            json_file = open(fl)
+            jobs_array = json.load(json_file)
+            json_file.close()
+            jobs = []
+            for j in jobs_array:
+                jobs.append(Job(j['billing_config_file'], j['product_config_file'], j['settings_config_file'], j['job_id'], False)) #all jobs are false by default
+            return JobQueue(jobs)
+        except:
+            raise ImproperJobsConfig('Cant open jobs file')
+
+
+class State(Enum):
+    failed = -1
+    unstarted = 0
+    trying_to_add_to_cart = 1
+    added_to_cart = 2
+    generating_session_id = 3
+    generated_session_id = 4
+    getting_transaction_number = 5
+    got_transaction_number = 6
+    submitting_card_info = 7
+    submitted_card_info = 8
+    validating_address = 9
+    validated_address = 10
+    completed = 11
+
+class JobState:
+    
+    def __init__(self, job_instance):
+        self.state: State = State.unstarted
+        self.transaction_number: Optional[int] = None
+        self.session_id: Optional[str] = None
+        self.job_instance: Optional[Job] = job_instance
+    
+    def reset(self):
+        self.kill()
+        self.state = State.unstarted
+    def update(self, transaction_number: Optional[int], session_id: Optional[str]):
+        self.state = State(self.state.value + 1)
+        self.job_instance.log(f'New State: {self.state.name}')
+        self.transaction_number = transaction_number
+        self.session_id = session_id
+    def kill(self):
+        self.job_instance.log(f'killed @ {self.state.name}')
+        self.state = State.failed
+        self.transaction_number = None
+        self.session_id = None
+        self.job_instance = None
+    def is_alive(self):
+        return self.state != State.failed
+    def died(self):
+        return not self.is_alive()
+class Job(threading.Thread):
+
+    def __init__(self, billing_config_file: str, product_config_file: str, settings_config_file: str, job_id: int, real: bool) -> None:
         self.billing_profile: BillingProfile = BillingProfile.from_config_file(billing_config_file)
         self.product_profile: ProductProfile = ProductProfile.from_config_file(product_config_file)
         self.settings_profile: SettingsProfile = SettingsProfile.from_config_file(settings_config_file)
+        self.job_id: int = job_id
+        self.real: bool = real
 
-    def run_test_job(self, cookies: dict):
+    def run(self):
+        print(f'Running job {self.job_id}')
+        cookies = gather_cookies(self.settings_profile.cookie_file)
+        if cookies is None:
+            self.log('Cant read cookie file')
+            return
+        if self.real:
+            finalState = self.run_real_job(cookies)
+        else:
+            finalState = self.run_test_job(cookies)
+
+        if finalState.died():
+            self.log('Died')
+        else:
+            self.log('Finished')
+
+    def run_test_job(self, cookies: dict) -> JobState:
         communicator: NeweggCommunicator = NeweggCommunicator(cookies, self.settings_profile.timeout)
-        self.run_test_subroutine(communicator)
+        return self.run_test_subroutine(communicator)
 
-    def run_real_job(self, communicator: NeweggCommunicator) -> self.JobState:
+    def run_real_job(self, cookies: dict) -> JobState:
         communicator: NeweggCommunicator = NeweggCommunicator(cookies, self.settings_profile.timeout)
-        self.run_test_subroutine(communicator)
+        return self.run_test_subroutine(communicator)
 
-    def run_test_subroutine(self, communicator: NeweggCommunicator) -> self.JobState:
-        state: self.JobState = self.JobState(communicator)
+    def run_test_subroutine(self, communicator: NeweggCommunicator) -> JobState:
+        state: JobState = JobState(self)
         self.add_to_cart(communicator, state)
         self.gen_session_id(communicator, state)
         self.get_transaction_number(communicator, state)
@@ -66,8 +120,8 @@ class Job:
         self.validate_address(communicator, state)
         return state
 
-    def run_real_subroutine(self, communicator: NeweggCommunicator) -> self.JobState:
-        state: self.JobState = self.JobState(communicator)
+    def run_real_subroutine(self, communicator: NeweggCommunicator) -> JobState:
+        state: JobState = JobState(self)
         self.add_to_cart(communicator, state)
         self.gen_session_id(communicator, state)
         self.get_transaction_number(communicator, state)
@@ -135,3 +189,6 @@ class Job:
                 state.kill()
             else:
                 state.update(state.transaction_number, state.session_id)
+
+    def log(self, s: str) -> None:
+        print(f'Job {self.job_id}: {s}')
