@@ -1,11 +1,12 @@
 {
-  "name": "Donald Trump",
+  "name": "Donald Duck"
   "phone": "(XXX) XXX-XXXX",
-  "address": "25 Cheese Rd",
+  "address": "XXX Road Rd",
   "zip_code": "XXXXX-XXXX",
-  "state": "MA",
+  "state": "BA",
   "city": "Boston",
-  "cvv": "029",
+  "cvv": "053",
   "country": "USA",
-  "country_long": "United States"
+  "country_long": "United States",
+  "card_provider": "Discover"
 }
