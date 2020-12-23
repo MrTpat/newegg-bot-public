@@ -5,7 +5,7 @@ from errors import ImproperSettingsConfig
 
 
 class BillingProfile:
-    def __init__(self, name: str, phone: str, address: str, zip_code: str, state: str, city: str, cvv: str, country: str, country_long: str, raw_entries: dict) -> None:
+    def __init__(self, name: str, phone: str, address: str, zip_code: str, state: str, city: str, cvv: str, country: str, country_long: str) -> None:
         self.name: str = name
         self.phone: str = phone
         self.address: str = address
@@ -15,7 +15,6 @@ class BillingProfile:
         self.cvv: str = cvv
         self.country: str = country
         self.country_long: str = country_long
-        self.raw_entries: dict = raw_entries
 
     @staticmethod
     def from_dict(d: dict):
@@ -29,7 +28,7 @@ class BillingProfile:
             cvv = d['city']
             country = d['country']
             country_long = d['country_long']
-            return BillingProfile(name, phone, address, zip_code, state, city, cvv, country, country_long, d)
+            return BillingProfile(name, phone, address, zip_code, state, city, cvv, country, country_long)
         except:
             raise ImproperBillingConfig('Bad billing file')
         
@@ -54,7 +53,7 @@ class ProductProfile:
         try:
             p_id = d['p_id']
             s_id = d['s_id']
-            is_combo = d['is_combo'] == 'true'
+            is_combo = d['is_combo']
             return ProductProfile(p_id, s_id, is_combo)
         except:
             raise ImproperProductConfig('Bad product file')

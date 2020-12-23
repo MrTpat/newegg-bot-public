@@ -49,7 +49,7 @@ class NeweggCommunicator:
         headers = self.get_default_headers({'referer': 'https://secure.newegg.com/shop/cart'})
         data = gen_data()
         try:
-            req = requests.post(url, headers=headers, data=data, cookies=self.cookies, timeout=self.timeout)
+            req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
             if req.status_code != 200:
                 return None
             json_res = req.json()
@@ -62,7 +62,7 @@ class NeweggCommunicator:
         headers = self.get_default_headers({'x-sessionid': session_id, 'referer': f'https://secure.newegg.com/shop/checkout?sessionId={session_id}'})
         data = {'SessionID':session_id,'Actions':[{'ActionType':'AlterPanelStatus','JsonContent':json.dumps({'ActionType':'AlterPanelStatus','PanelStatus':{'ShippingAddress':'Done','DeliveryMethod':'Done','TaxID':'Done','Payment':'Todo'}})}],'EnableAsyncToken':True}
         try:
-            req = requests.post(url, headers=headers, data=data, cookies=self.cookies, timeout=self.timeout)
+            req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
             if req.status_code != 200:
                 return None
             return req.json()['PaymentOption']['CreditCardList'][0]['TransactionNumber']
@@ -74,7 +74,7 @@ class NeweggCommunicator:
         headers = self.get_default_headers({'x-sessionid': session_id, 'referer': f'https://secure.newegg.com/shop/checkout?sessionId={session_id}'})
         data = {'SessionID':session_id,'Actions':[{'ActionType':'ConfirmPayment','JsonContent':json.dumps({'ActionType':'ConfirmPayment','Cvv2': cvv, 'TransactionNumber': transaction_number, 'PaytermsCode': 'Discover'})}],'EnableAsyncToken':True}
         try:
-            req = requests.post(url, headers=headers, data=data, cookies=self.cookies, timeout=self.timeout)
+            req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
             return req.status_code == 200
         except:
             return False
@@ -84,7 +84,7 @@ class NeweggCommunicator:
         headers = self.get_default_headers({'x-sessionid': session_id, 'referer': f'https://secure.newegg.com/shop/checkout?sessionId={session_id}'})
         data = {'TransNumber': transaction_number, 'AddressLabel': 'Untitled', 'ContactWith': name, 'Phone': phone, 'Fax': '', 'Country': country, 'State': state, 'City': city, 'Address1': address, 'Address2': '', 'ZipCode': zip_code, 'IsDefault': False, 'DisplayLines': [address, f'{city}, {state} {zip_code}', country_long, phone], 'AddressVerifyMark': 'Verified', 'Email': None, 'DisableEmail': False, 'CompanyName': '', 'LanguageCode': None, 'IsSelected': False, 'SaveAddress': False, 'QASDisplayLines': [address, f'{city}, {state} {zip_code}', country_long]}
         try:
-            req = requests.post(url, headers=headers, data=data, cookies=self.cookies, timeout=self.timeout)
+            req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
             return req.status_code == 200
         except:
             return False
@@ -94,7 +94,7 @@ class NeweggCommunicator:
         headers = self.get_default_headers({'x-sessionid': session_id, 'referer': 'https://secure.newegg.com/shop/checkout?sessionId={session_id}'})
         data = {'SessionID': session_id, 'IsAcceptNSCCAuth': False, 'SubscribeNewsletterFlag': False, 'CreactAccount': False, 'Password': '', 'MobileSubscribe': {}, 'LanguageCode': 'en-us', 'Cvv2': ''}
         try:
-            req = requests.post(url, headers=headers, data=data, cookies=self.cookies, timeout=self.timeout)
+            req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
             return req.status_code == 200
         except:
             return False
