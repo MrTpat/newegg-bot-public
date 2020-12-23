@@ -53,19 +53,20 @@ class Job:
         communicator: NeweggCommunicator = NeweggCommunicator(cookies, self.settings_profile.timeout)
         self.run_test_subroutine(communicator)
 
-    def run_real_job(self, cookies: dict):
+    def run_real_job(self, communicator: NeweggCommunicator) -> self.JobState:
         communicator: NeweggCommunicator = NeweggCommunicator(cookies, self.settings_profile.timeout)
-        self.run_real_subroutine(communicator)
+        self.run_test_subroutine(communicator)
 
-    def run_test_subroutine(self, communicator: NeweggCommunicator) -> None:
+    def run_test_subroutine(self, communicator: NeweggCommunicator) -> self.JobState:
         state: self.JobState = self.JobState(communicator)
         self.add_to_cart(communicator, state)
         self.gen_session_id(communicator, state)
         self.get_transaction_number(communicator, state)
         self.submit_card_info(communicator, state)
         self.validate_address(communicator, state)
+        return state
 
-    def run_real_subroutine(self, communicator: NeweggCommunicator) -> bool:
+    def run_real_subroutine(self, communicator: NeweggCommunicator) -> self.JobState:
         state: self.JobState = self.JobState(communicator)
         self.add_to_cart(communicator, state)
         self.gen_session_id(communicator, state)
@@ -73,6 +74,7 @@ class Job:
         self.submit_card_info(communicator, state)
         self.validate_address(communicator, state)
         self.submit_order(communicator, state)
+        return state
 
     def add_to_cart(self, communicator: NeweggCommunicator, state: JobState) -> None:
         atc_limit = self.settings_profile.atc_limit
