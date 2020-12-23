@@ -12,7 +12,7 @@ def universal_function_limiter(func, limit: int, options: dict, repeatWhile: Any
     return None
 
 def gather_cookies(file_name: str) -> Optional[dict]:
-    f = open(f'../cookies/{file_name}')
+    f = open(f'cookies/{file_name}')
     try:
         return json.load(f)
     except:

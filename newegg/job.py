@@ -9,6 +9,7 @@ from enum import Enum
 from typing import Optional
 import threading
 import json
+import os
 
 class JobQueue:
     def __init__(self, jobs: list) -> None:
@@ -26,7 +27,8 @@ class JobQueue:
     @staticmethod
     def from_config_file(fl: str):
         try:
-            json_file = open(fl)
+            #print(os.getcwd())
+            json_file = open(f'configs/{fl}')
             jobs_array = json.load(json_file)
             json_file.close()
             jobs = []
@@ -86,6 +88,7 @@ class Job(threading.Thread):
         self.settings_profile: SettingsProfile = SettingsProfile.from_config_file(settings_config_file)
         self.job_id: int = job_id
         self.real: bool = real
+        threading.Thread.__init__(self)
 
     def run(self):
         print(f'Running job {self.job_id}')
