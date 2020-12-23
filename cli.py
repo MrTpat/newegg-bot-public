@@ -1,5 +1,4 @@
 import click
-import os
 from newegg.job import JobQueue
 
 @click.command()

@@ -9,7 +9,6 @@ from enum import Enum
 from typing import Optional
 import threading
 import json
-import os
 
 class JobQueue:
     def __init__(self, jobs: list) -> None:
