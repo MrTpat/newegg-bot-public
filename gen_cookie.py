@@ -7,7 +7,6 @@ import json
 import time
 import requests
 from urllib.parse import urlparse, parse_qs
-import colors
 from chromedriver_py import binary_path
 
 def saveCookies(sel):
@@ -15,10 +14,10 @@ def saveCookies(sel):
     for c in sel.get_cookies():
         d[c['name']] = c['value']
     j = json.dumps(d)
-    f = open("cookies.json","w")
+    f = open("cookies/cookies.json","w")
     f.write(j)
     f.close()
-    colors.printSuccess('saved cookies!')
+    print('saved cookies!')
 
 def initBrowser(url):
     chrome_options = Options()
