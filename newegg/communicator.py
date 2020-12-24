@@ -2,6 +2,7 @@ import requests
 from base64 import standard_b64encode
 import json
 from typing import Optional
+from .logger import DebugLogger
 
 class NeweggCommunicator:
     def __init__(self, cookies, timeout) -> None:
@@ -15,6 +16,8 @@ class NeweggCommunicator:
         url += p_id
         try:
             req = requests.get(url, cookies=self.cookies, timeout=self.timeout)
+            DebugLogger.log(f'Add to cart url: {req.url}')
+            DebugLogger.log(f'Add to cart status: {req.status_code}')
             return p_id in req.url
         except:
             return False
@@ -48,8 +51,11 @@ class NeweggCommunicator:
         url = 'https://secure.newegg.com/shop/api/CheckoutApi'
         headers = self.get_default_headers({'referer': 'https://secure.newegg.com/shop/cart'})
         data = gen_data()
+        DebugLogger.log(f'Session id data: {data}')
         try:
             req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
+            DebugLogger.log(f'Session id request text: {req.text}')
+            DebugLogger.log(f'Session id request status: {req.status_code}')
             if req.status_code != 200:
                 return None
             json_res = req.json()
@@ -61,8 +67,12 @@ class NeweggCommunicator:
         url = 'https://secure.newegg.com/shop/api/InitOrderReviewApi'
         headers = self.get_default_headers({'x-sessionid': session_id, 'referer': f'https://secure.newegg.com/shop/checkout?sessionId={session_id}'})
         data = {'SessionID':session_id,'Actions':[{'ActionType':'AlterPanelStatus','JsonContent':json.dumps({'ActionType':'AlterPanelStatus','PanelStatus':{'ShippingAddress':'Done','DeliveryMethod':'Done','TaxID':'Done','Payment':'Todo'}})}],'EnableAsyncToken':True}
+        DebugLogger.log(f'Transaction number headers: {headers}')
+        DebugLogger.log(f'Transaction number data: {data}')
         try:
             req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
+            DebugLogger.log(f'Transaction number text: {req.text}')
+            DebugLogger.log(f'Transaction number status: {req.status_code}')
             if req.status_code != 200:
                 return None
             return req.json()['PaymentOption']['CreditCardList'][0]['TransactionNumber']
@@ -75,6 +85,8 @@ class NeweggCommunicator:
         data = {'SessionID':session_id,'Actions':[{'ActionType':'ConfirmPayment','JsonContent':json.dumps({'ActionType':'ConfirmPayment','Cvv2': cvv, 'TransactionNumber': transaction_number, 'PaytermsCode': 'Discover'})}],'EnableAsyncToken':True}
         try:
             req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
+            DebugLogger.log(f'Card info text: {req.text}')
+            DebugLogger.log(f'Card info status: {req.status_code}')
             return req.status_code == 200
         except:
             return False
@@ -85,6 +97,8 @@ class NeweggCommunicator:
         data = {'TransNumber': transaction_number, 'AddressLabel': 'Untitled', 'ContactWith': name, 'Phone': phone, 'Fax': '', 'Country': country, 'State': state, 'City': city, 'Address1': address, 'Address2': '', 'ZipCode': zip_code, 'IsDefault': False, 'DisplayLines': [address, f'{city}, {state} {zip_code}', country_long, phone], 'AddressVerifyMark': 'Verified', 'Email': None, 'DisableEmail': False, 'CompanyName': '', 'LanguageCode': None, 'IsSelected': False, 'SaveAddress': False, 'QASDisplayLines': [address, f'{city}, {state} {zip_code}', country_long]}
         try:
             req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
+            DebugLogger.log(f'Validate address text: {req.text}')
+            DebugLogger.log(f'Validate address status: {req.status_code}')
             return req.status_code == 200
         except:
             return False
@@ -95,6 +109,8 @@ class NeweggCommunicator:
         data = {'SessionID': session_id, 'IsAcceptNSCCAuth': False, 'SubscribeNewsletterFlag': False, 'CreactAccount': False, 'Password': '', 'MobileSubscribe': {}, 'LanguageCode': 'en-us', 'Cvv2': ''}
         try:
             req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
+            DebugLogger.log(f'Submit order text: {req.text}')
+            DebugLogger.log(f'Submit order status: {req.status_code}')
             return req.status_code == 200
         except:
             return False
