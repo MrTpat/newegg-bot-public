@@ -1,5 +1,7 @@
 # newegg-bot-public
 
+### For issues, please include your log file which is in the logs directory
+
 ## USAGE
 1) ensure python3, pipenv, and the latest Chrome version are installed
 2) git clone the repository
@@ -12,7 +14,7 @@
 	- In the Python shell prompt, click any button to save your cookies
 	- You can click CTRL-C on the prompt to exit. Also exit out of the opened browser window.
 7) Edit the configs/billing_config file. This should match with your primary Newegg card. Follow the format specified exactly.
-8) Edit the configs/jobs_config file. Add more jobs to the array as you wish. All the jobs in this file will be run concurrently when the script is launched, so be careful about adding too many. Make sure each entry has a different job id.
+8) Edit the configs/jobs_config file. Add more jobs to the array as you wish. All the jobs in this file will be run concurrently when the script is launched, so be careful about adding too many. Make sure each entry has a different job id. The attempts attribute is how many times to run that job before it is officially marked as a failed job.
 9) Edit the configs/product_config file.
 	- If you are using combos, set is_combo to true. For combos, the URL of the newegg page looks like this: https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4212056. The p_id is the portion after Combo., so in this case it would be "4212056". The s_id is the p_id of the highest-value product in the combo. In this case the p_id of the Intel CPU. Read the next bullet point for info on how to get this.
 	- If you are not using a combo, set is_combo to false. For single items, the URL looks like this: https://www.newegg.com/amd-ryzen-5-5600x/p/N82E16819113666. The p_id is the last portion, so in this case, it is N82E16819113666. The s_id is the last 8 digits of the p_id, hyphenated. In this case the p_id would be 19-113-666.
