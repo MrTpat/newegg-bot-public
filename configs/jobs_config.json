@@ -5,12 +5,5 @@
     "product_config_file": "product_config.json",
     "billing_config_file": "billing_config.json",
     "attempts": 1
-  },
-  {
-    "job_name": "default job 2",
-    "settings_config_file": "settings_config.json",
-    "product_config_file": "product_config.json",
-    "billing_config_file": "billing_config.json",
-    "attempts": 2
   }
 ]
