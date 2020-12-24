@@ -9,6 +9,7 @@ selenium = "*"
 requests = "*"
 chromedriver-py = "==87.0.4280.20"
 click = "*"
+colorama = "*"
 
 [dev-packages]
 pylint = "*"

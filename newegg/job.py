@@ -4,7 +4,7 @@ from .profiles import ProductProfile
 from .profiles import SettingsProfile
 from .util import universal_function_limiter
 from .util import gather_cookies
-from .errors import ImproperJobsConfig
+from .logger import Logger
 from enum import Enum
 from typing import Optional
 import threading
@@ -34,8 +34,8 @@ class JobQueue:
             for j in jobs_array:
                 jobs.append(Job(j['billing_config_file'], j['product_config_file'], j['settings_config_file'], j['job_id'], False)) #all jobs are false by default
             return JobQueue(jobs)
-        except:
-            raise ImproperJobsConfig('Cant open jobs file')
+        except Exception as e:
+            Logger.handle_err(e)
 
 
 class State(Enum):
@@ -60,26 +60,27 @@ class JobState:
         self.state: State = State.unstarted
         self.transaction_number: Optional[int] = None
         self.session_id: Optional[str] = None
-        self.job_instance: Optional[Job] = job_instance
+        self.job_instance: Job = job_instance
+        self.logger: Logger = self.job_instance.logger
     
     def reset(self):
         self.kill()
         self.state = State.unstarted
     def update(self, transaction_number: Optional[int], session_id: Optional[str]):
         self.state = State(self.state.value + 1)
-        self.job_instance.log(f'New State: {self.state.name}')
+        self.logger.log_info(f'New State: {self.state.name}')
         self.transaction_number = transaction_number
         self.session_id = session_id
     def kill(self):
-        self.job_instance.log(f'killed @ {self.state.name}')
+        self.logger.log_err(f'Killed @ {self.state.name}')
         self.state = State.failed
         self.transaction_number = None
         self.session_id = None
-        self.job_instance = None
     def is_alive(self):
         return self.state != State.failed
     def died(self):
         return not self.is_alive()
+
 class Job(threading.Thread):
 
     def __init__(self, billing_config_file: str, product_config_file: str, settings_config_file: str, job_id: int, real: bool) -> None:
@@ -88,23 +89,21 @@ class Job(threading.Thread):
         self.settings_profile: SettingsProfile = SettingsProfile.from_config_file(settings_config_file)
         self.job_id: int = job_id
         self.real: bool = real
+        self.logger: Logger = Logger(f'[Job {job_id}] ')
         threading.Thread.__init__(self)
 
     def run(self):
-        print(f'Running job {self.job_id}')
+        self.logger.log_info(f'Running job {self.job_id}')
         cookies = gather_cookies(self.settings_profile.cookie_file)
-        if cookies is None:
-            self.log('Cant read cookie file')
-            return
         if self.real:
             finalState = self.run_real_job(cookies)
         else:
             finalState = self.run_test_job(cookies)
 
         if finalState.died():
-            self.log('Died')
+            self.logger.log_err(f'Died')
         else:
-            self.log('Finished')
+            self.logger.log_success(f'Finished')
 
     def run_test_job(self, cookies: dict) -> JobState:
         communicator: NeweggCommunicator = NeweggCommunicator(cookies, self.settings_profile.timeout)
@@ -192,6 +191,3 @@ class Job(threading.Thread):
                 state.kill()
             else:
                 state.update(state.transaction_number, state.session_id)
-
-    def log(self, s: str) -> None:
-        print(f'Job {self.job_id}: {s}')
