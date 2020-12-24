@@ -72,7 +72,7 @@ class JobState:
         self.transaction_number = transaction_number
         self.session_id = session_id
     def kill(self):
-        self.logger.log_err(f'Killed @ {self.state.name}')
+        self.logger.log_important(f'Killed @ {self.state.name}')
         self.state = State.failed
         self.transaction_number = None
         self.session_id = None
@@ -96,7 +96,10 @@ class Job(threading.Thread):
 
     def run(self) -> None:
         self.logger.log_important(f'Running {self.attempts} attempts of job: {self.job_name}')
-        universal_function_limiter(self.run_once, self.attempts, {}, False)
+        if universal_function_limiter(self.run_once, self.attempts, {}, False):
+            self.logger.log_success(f'Job {self.job_name} succeeded!')
+        else:
+            self.logger.log_err(f'Job {self.job_name} failed!')
 
     def run_once(self) -> bool:
         self.logger.log_important(f'Running attempt of job: {self.job_name}')
@@ -106,9 +109,9 @@ class Job(threading.Thread):
             finalState = self.run_test_job(self.cookies)
 
         if finalState.died():
-            self.logger.log_err(f'Died')
+            self.logger.log_important(f'Died')
         else:
-            self.logger.log_success(f'Finished')
+            self.logger.log_important(f'Finished')
         
         return finalState.is_alive()
 
