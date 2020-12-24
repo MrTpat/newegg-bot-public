@@ -32,10 +32,10 @@ class JobQueue:
             json_file.close()
             jobs = []
             for j in jobs_array:
-                jobs.append(Job(j['billing_config_file'], j['product_config_file'], j['settings_config_file'], j['job_id'], False)) #all jobs are false by default
+                jobs.append(Job(j['billing_config_file'], j['product_config_file'], j['settings_config_file'], j['job_name'], False)) #all jobs are false by default
             return JobQueue(jobs)
         except Exception as e:
-            Logger.handle_err(e)
+            Logger('[Jobs Profile] ').handle_err(e)
 
 
 class State(Enum):
@@ -83,17 +83,17 @@ class JobState:
 
 class Job(threading.Thread):
 
-    def __init__(self, billing_config_file: str, product_config_file: str, settings_config_file: str, job_id: int, real: bool) -> None:
+    def __init__(self, billing_config_file: str, product_config_file: str, settings_config_file: str, job_name: str, real: bool) -> None:
         self.billing_profile: BillingProfile = BillingProfile.from_config_file(billing_config_file)
         self.product_profile: ProductProfile = ProductProfile.from_config_file(product_config_file)
         self.settings_profile: SettingsProfile = SettingsProfile.from_config_file(settings_config_file)
-        self.job_id: int = job_id
+        self.job_name: str = job_name
         self.real: bool = real
-        self.logger: Logger = Logger(f'[Job {job_id}] ')
+        self.logger: Logger = Logger(f'[Job: {job_name}] ')
         threading.Thread.__init__(self)
 
     def run(self):
-        self.logger.log_info(f'Running job {self.job_id}')
+        self.logger.log_info(f'Running job: {self.job_name}')
         cookies = gather_cookies(self.settings_profile.cookie_file)
         if self.real:
             finalState = self.run_real_job(cookies)
