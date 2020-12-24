@@ -1,33 +1,22 @@
 # newegg-bot-public
 
-## THIS BOT CAN CHECKOUT OF NEWEGG IN <4 SECONDS.
-
-## Currently, the interval limit I set is 30 seconds, since newegg bans liberally. To circumvent this, you can run python3 buyBot.py 5600X
-## when you know a drop is coming. Run it ~30 seconds before the drop and you should be golden.
-
-Usage:
-
-Navigate to the repo, and run pipenv install. This will take some time.
-When this is done, configure the config.ini file how you want. For notifications, make sure to fill the bottom most configuration.
-
-Imagine we want to bot this product: https://www.newegg.com/amd-ryzen-5-5600x/p/N82E16819113666
-
-The primary ID is the part following the /p/, so it is N82E16819113666.
-The secondary ID is found by right-clicking the image in Chrome, inspecting, and copying the ID before the -V part. For example, for this html code of the picture:
-
-```
-<img alt="" id="mainSlide19-113-666" class="product-view-img-original" src="https://c1.neweggimages.com/ProductImage/19-113-666-V01.jpg">
-```
-
-The secondary ID is 19-113-666 (make sure to add dashes to the config).
-
-## ALSO MAKE SURE TO UPDATE YOUR CREDENTIALS AT THE BOTTOM OF THE CONFIG SO THAT THEY MATCH WITH YOUR CARD INFO. THE INFO SHOULD BE TIED TO YOUR PRIMARY CARD IN NEWEGG.
-
-## FOR COMBOS, THE PRIMARY ID IS THE THING AFTER COMBO. IN THE URL. THE SECONDARY ID IS THE PRIMARY ID OF THE HIGHEST-PRICED PRODUCT IN THE COMBO!!!
-
-Once done with the config, run pipenv shell.
-
-To run the scanner for an item, say the 5600X, I would do python scanner.py 5600X.
-To run the buybot (you know a drop is coming), run python buyBot 5600X.
-
-Running with no arguments will run the test configuration and will not actually purchase anything.
+## USAGE
+1) ensure python3, pipenv, and the latest Chrome version are installed
+2) git clone the repository
+3) navigate to the repository
+4) run pipenv install
+5) run pipenv shell
+6) run python gen_cookie.py
+	- This will open up a browser window
+	- Login into newegg. Once logged in, wait for the page to completely stop loading.
+	- In the Python shell prompt, click any button to save your cookies
+	- You can click CTRL-C on the prompt to exit. Also exit out of the opened browser window.
+7) Edit the configs/billing_config file. This should match with your primary Newegg card. Follow the format specified exactly.
+8) Edit the configs/jobs_config file. Add more jobs to the array as you wish. All the jobs in this file will be run concurrently when the script is launched, so be careful about adding too many. Make sure each entry has a different job id.
+9) Edit the configs/product_config file.
+	- If you are using combos, set is_combo to true. For combos, the URL of the newegg page looks like this: https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4212056. The p_id is the portion after Combo., so in this case it would be "4212056". The s_id is the p_id of the highest-value product in the combo. In this case the p_id of the Intel CPU. Read the next bullet point for info on how to get this.
+	- If you are not using a combo, set is_combo to false. For single items, the URL looks like this: https://www.newegg.com/amd-ryzen-5-5600x/p/N82E16819113666. The p_id is the last portion, so in this case, it is N82E16819113666. The s_id is the last 8 digits of the p_id, hyphenated. In this case the p_id would be 19-113-666.
+10) Edit the configs/settings_config file. The act_limit is how many attempts to try to ATC before failing. Similar for the other _limit variables. The timeout variable is the timeout for each request. If a request exceeds that time (in seconds) then it will fail. The cookie_file is the name of the cookie file you would like to use. Unless you manually changed this, it should stay as cookies.json.
+11) Now, you can run the program. I recommend only running when there is a drop coming. For example, if there is a drop at 7 PM, generate your cookies at 6:55 PM. Then, run the actual script(described after this) at exactly 7 PM. The reason you need to generate fresh cookies is because they expire after an hour, so the ones you have on while may not work.
+12) To run the script in test mode, run `python cli.py jobs_config_file.json --test`. To run the script in real mode, run `python cli.py jobs_config_file.json --real`. Feel free to make different job configurations for both your test and real modes. Running with no test or real parameter will default the program to test mode.
+13) The script will provide output on what it is doing once you run it.
