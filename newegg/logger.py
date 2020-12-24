@@ -3,8 +3,10 @@ from typing import Optional
 
 class Logger:
 
-    def __init__(self, pre_text: Optional[str]) -> None:
+    def __init__(self, pre_text: Optional[str] = None) -> None:
         self.pre_text: Optional[str] = pre_text
+        if self.pre_text is None:
+            self.pre_text = ''
         click.clear()
         
     

@@ -17,4 +17,4 @@ def gather_cookies(file_name: str) -> Optional[dict]:
     try:
         return json.load(f)
     except Exception as e:
-        Logger.handle_err(e)
+        Logger().handle_err(e)
