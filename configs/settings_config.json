@@ -1,10 +1,10 @@
 {
-  "atc_limit": 500,
+  "atc_limit": 100,
   "gen_session_id_limit": 1,
-  "get_transaction_number_limit": 10,
-  "submit_card_info_limit": 10,
-  "validate_address_limit": 10,
-  "submit_order_limit": 10,
+  "get_transaction_number_limit": 5,
+  "submit_card_info_limit": 5,
+  "validate_address_limit": 5,
+  "submit_order_limit": 5,
   "timeout": 3,
   "cookie_file": "cookies.json"
 }

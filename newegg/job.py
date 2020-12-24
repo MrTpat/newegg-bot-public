@@ -51,7 +51,8 @@ class State(Enum):
     submitted_card_info = 8
     validating_address = 9
     validated_address = 10
-    completed = 11
+    submitting_order = 11
+    submitted_order = 12
 
 class JobState:
     
@@ -111,7 +112,7 @@ class Job(threading.Thread):
 
     def run_real_job(self, cookies: dict) -> JobState:
         communicator: NeweggCommunicator = NeweggCommunicator(cookies, self.settings_profile.timeout)
-        return self.run_test_subroutine(communicator)
+        return self.run_real_subroutine(communicator)
 
     def run_test_subroutine(self, communicator: NeweggCommunicator) -> JobState:
         state: JobState = JobState(self)

@@ -3,7 +3,6 @@
     "job_id": 1,
     "settings_config_file": "settings_config.json",
     "product_config_file": "product_config.json",
-    "billing_config_file": "billing_config.json",
-    "real": false
+    "billing_config_file": "billing_config.json"
   }
 ]

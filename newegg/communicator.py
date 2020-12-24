@@ -89,7 +89,7 @@ class NeweggCommunicator:
         except:
             return False
 
-    def submit_order(self, session_id: str) -> bool:
+    def submit_order(self, session_id: str, **kwargs) -> bool:
         url = 'https://secure.newegg.com/shop/api/PlaceOrderApi'
         headers = self.get_default_headers({'x-sessionid': session_id, 'referer': 'https://secure.newegg.com/shop/checkout?sessionId={session_id}'})
         data = {'SessionID': session_id, 'IsAcceptNSCCAuth': False, 'SubscribeNewsletterFlag': False, 'CreactAccount': False, 'Password': '', 'MobileSubscribe': {}, 'LanguageCode': 'en-us', 'Cvv2': ''}
