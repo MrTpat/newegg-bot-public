@@ -32,7 +32,7 @@ class JobQueue:
             json_file.close()
             jobs = []
             for j in jobs_array:
-                jobs.append(Job(j['billing_config_file'], j['product_config_file'], j['settings_config_file'], j['job_name'], False)) #all jobs are false by default
+                jobs.append(Job(j['billing_config_file'], j['product_config_file'], j['settings_config_file'], j['job_name'], False, j['attempts'])) 
             return JobQueue(jobs)
         except Exception as e:
             Logger('[Jobs Profile] ').handle_err(e)
@@ -83,27 +83,34 @@ class JobState:
 
 class Job(threading.Thread):
 
-    def __init__(self, billing_config_file: str, product_config_file: str, settings_config_file: str, job_name: str, real: bool) -> None:
+    def __init__(self, billing_config_file: str, product_config_file: str, settings_config_file: str, job_name: str, real: bool, attempts: int) -> None:
         self.billing_profile: BillingProfile = BillingProfile.from_config_file(billing_config_file)
         self.product_profile: ProductProfile = ProductProfile.from_config_file(product_config_file)
         self.settings_profile: SettingsProfile = SettingsProfile.from_config_file(settings_config_file)
         self.job_name: str = job_name
         self.real: bool = real
+        self.attempts: int = attempts
+        self.cookies: dict = gather_cookies(self.settings_profile.cookie_file)
         self.logger: Logger = Logger(f'[Job: {job_name}] ')
         threading.Thread.__init__(self)
 
-    def run(self):
-        self.logger.log_info(f'Running job: {self.job_name}')
-        cookies = gather_cookies(self.settings_profile.cookie_file)
+    def run(self) -> None:
+        self.logger.log_important(f'Running {self.attempts} attempts of job: {self.job_name}')
+        universal_function_limiter(self.run_once, self.attempts, {}, False)
+
+    def run_once(self) -> bool:
+        self.logger.log_important(f'Running attempt of job: {self.job_name}')
         if self.real:
-            finalState = self.run_real_job(cookies)
+            finalState = self.run_real_job(self.cookies)
         else:
-            finalState = self.run_test_job(cookies)
+            finalState = self.run_test_job(self.cookies)
 
         if finalState.died():
             self.logger.log_err(f'Died')
         else:
             self.logger.log_success(f'Finished')
+        
+        return finalState.is_alive()
 
     def run_test_job(self, cookies: dict) -> JobState:
         communicator: NeweggCommunicator = NeweggCommunicator(cookies, self.settings_profile.timeout)

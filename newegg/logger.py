@@ -22,6 +22,10 @@ class Logger:
         s = f'{self.pre_text}{s}'
         click.secho(s, fg='green', bold=True)
 
+    def log_important(self, s:str) -> None:
+        s = f'{self.pre_text}{s}'
+        click.secho(s, fg='yellow', bold=True)
+
     def handle_err(self, e: Exception) -> None:
         self.log_err(str(e))
         exit(1)
