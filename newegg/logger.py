@@ -7,8 +7,6 @@ class Logger:
         self.pre_text: Optional[str] = pre_text
         if self.pre_text is None:
             self.pre_text = ''
-        click.clear()
-        
     
     def log_err(self, s: str) -> None:
         s = f'{self.pre_text}{s}'
