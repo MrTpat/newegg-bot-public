@@ -10,9 +10,14 @@ requests = "*"
 chromedriver-py = "==87.0.4280.20"
 click = "*"
 colorama = "*"
+black = "*"
+pre-commit = "*"
 
 [dev-packages]
 pylint = "*"
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
