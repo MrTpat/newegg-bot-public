@@ -25,7 +25,7 @@ class BillingProfile:
             zip_code = d['zip_code']
             state = d['state']
             city = d['city']
-            cvv = d['city']
+            cvv = d['cvv']
             country = d['country']
             country_long = d['country_long']
             card_provider = d['card_provider']
