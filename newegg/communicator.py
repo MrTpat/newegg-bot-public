@@ -79,10 +79,10 @@ class NeweggCommunicator:
         except:
             return None
 
-    def submit_card_info(self, transaction_number: int, cvv: str, session_id: str, **kwargs) -> bool:
+    def submit_card_info(self, transaction_number: int, cvv: str, session_id: str, card_provider: str, **kwargs) -> bool:
         url = 'https://secure.newegg.com/shop/api/InitOrderReviewApi'
         headers = self.get_default_headers({'x-sessionid': session_id, 'referer': f'https://secure.newegg.com/shop/checkout?sessionId={session_id}'})
-        data = {'SessionID':session_id,'Actions':[{'ActionType':'ConfirmPayment','JsonContent':json.dumps({'ActionType':'ConfirmPayment','Cvv2': cvv, 'TransactionNumber': transaction_number, 'PaytermsCode': 'Discover'})}],'EnableAsyncToken':True}
+        data = {'SessionID':session_id,'Actions':[{'ActionType':'ConfirmPayment','JsonContent':json.dumps({'ActionType':'ConfirmPayment','Cvv2': cvv, 'TransactionNumber': transaction_number, 'PaytermsCode': card_provider})}],'EnableAsyncToken':True}
         try:
             req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
             DebugLogger.log(f'Card info text: {req.text}')
