@@ -49,6 +49,9 @@ class DebugLogger:
     @staticmethod
     def save_log_to_file() -> None:
         from datetime import datetime
+        import os
+        if not os.path.exists('./logs'):
+            os.makedirs('./logs')
         try:
             now = datetime.now()
             str_date = now.strftime("%m_%d_%Y_%H_%M_%S")
