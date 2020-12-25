@@ -1,7 +1,5 @@
 import click
 from newegg.job import JobQueue
-from newegg.logger import DebugLogger
-import atexit
 
 @click.command()
 @click.argument('jobs_config_file')
@@ -13,5 +11,4 @@ def run(jobs_config_file: str, real: bool) -> None:
    queue.run()
 
 if __name__ == "__main__":
-    atexit.register(DebugLogger.save_log_to_file)
     run()

@@ -1,5 +1,7 @@
 import click
 from typing import Optional
+from .util import ensure_dir_exists
+import logging
 
 class Logger:
 
@@ -34,30 +36,14 @@ class Logger:
         exit(1)
 
 class DebugLogger:
-    lines: list = []
+    from datetime import datetime
+    ensure_dir_exists('./logs')
+    logging.basicConfig(filename=f'./logs/{datetime.now().strftime("%m_%d_%Y_%H_%M_%S")}', filemode='w', level=0)
 
     @staticmethod
     def log(s: str) -> None:
-        DebugLogger.lines.append(s)
+        logging.info(s)
 
     @staticmethod
     def log_err(e: Exception) -> None:
         DebugLogger.log(str(e))
-
-    @staticmethod
-    def save_log_to_file() -> None:
-        from datetime import datetime
-        import os
-        if not os.path.exists('./logs'):
-            os.makedirs('./logs')
-        try:
-            now = datetime.now()
-            str_date = now.strftime("%m_%d_%Y_%H_%M_%S")
-            f = open(f'logs/{str_date}', 'w')
-            DebugLogger.lines.append('') #prevents no newline at EOF
-            string_to_write: str = '\n'.join(DebugLogger.lines)
-            f.write(string_to_write)
-            f.close()
-        except Exception as e:
-            Logger().handle_err(e)
-
