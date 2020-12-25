@@ -122,7 +122,6 @@ class NeweggCommunicator:
                 cookies=self.cookies,
                 timeout=self.timeout,
             )
-            DebugLogger.log(f"Transaction number text: {req.text}")
             DebugLogger.log(f"Transaction number status: {req.status_code}")
             if req.status_code != 200:
                 return None
@@ -170,7 +169,6 @@ class NeweggCommunicator:
                 cookies=self.cookies,
                 timeout=self.timeout,
             )
-            DebugLogger.log(f"Card info text: {req.text}")
             DebugLogger.log(f"Card info status: {req.status_code}")
             return req.status_code == 200
         except:
