@@ -99,7 +99,7 @@ class NeweggCommunicator:
             req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
             DebugLogger.log(f'Validate address text: {req.text}')
             DebugLogger.log(f'Validate address status: {req.status_code}')
-            return req.status_code == 200
+            return req.status_code == 200 and req.json()['Result'] == 'Success'
         except:
             return False
 
@@ -111,6 +111,6 @@ class NeweggCommunicator:
             req = requests.post(url, headers=headers, json=data, cookies=self.cookies, timeout=self.timeout)
             DebugLogger.log(f'Submit order text: {req.text}')
             DebugLogger.log(f'Submit order status: {req.status_code}')
-            return req.status_code == 200
+            return req.status_code == 200 and req.json()['Result'] == 'Success'
         except:
             return False
