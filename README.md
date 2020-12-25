@@ -13,7 +13,7 @@
 	- In the Python shell prompt, click any button to save your cookies.
 	
 6) Copy or move all json files in `configs-default/` to `configs/`.
-7) Edit the `configs/billing_config.json` file. This should match with your default Newegg card. Follow the format specified exactly. For `card_provider`, we have confirmed the following possible entries: Mastercard, Visa, Discover
+7) Edit the `configs/billing_config.json` file. This should match with your default Newegg card. Follow the format specified exactly. For `card_provider`, we have confirmed the following possible entries: Mastercard, Visa, Discover, AmericanExpress
 8) Edit the `configs/jobs_config.json` file. Add more jobs to the array as you wish. All the jobs in this file will be run concurrently when the script is launched, so be careful about adding too many. Make sure each entry has a different job name. The `attempts` attribute is how many times to run that job before it is officially marked as a failed job.
 9) Edit the `configs/product_config.json` file.
 	- If you are using combos, set `is_combo` to **true**. For combos, the URL of the Newegg page looks like this: https://www.newegg.com/Product/ComboDealDetails?ItemList=Combo.4212056. The `p_id` is the portion after _Combo._, so in this case it would be _4212056_. The `s_id` is the `p_id` of the highest-value product in the combo; in this case, the `p_id` of the Intel CPU. Read the next bullet point for info on how to get this.
