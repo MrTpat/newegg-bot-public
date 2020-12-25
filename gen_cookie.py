@@ -38,6 +38,8 @@ def initBrowser(url):
 browser = initBrowser("https://www.newegg.com")
 app_logger.log_important("Enter cookie file name to save to cookies folder:")
 file_name = input()
+if not file_name:
+    file_name = "cookies.json"
 app_logger.log_important("Press key when page is done loading after you logged in:")
 input()
 saveCookies(browser, file_name)
