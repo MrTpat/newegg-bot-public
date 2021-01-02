@@ -1,5 +1,6 @@
 {
   "atc_limit": 100,
+  "cis_limit": 20,
   "gen_session_id_limit": 1,
   "get_transaction_number_limit": 5,
   "submit_card_info_limit": 5,

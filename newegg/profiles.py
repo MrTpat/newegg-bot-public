@@ -104,6 +104,7 @@ class SettingsProfile:
         self,
         timeout: int,
         atc_limit: int,
+        cis_limit: int,
         gen_session_id_limit: int,
         get_transaction_number_limit: int,
         submit_card_info_limit: int,
@@ -113,6 +114,7 @@ class SettingsProfile:
     ) -> None:
         self.timeout: int = timeout
         self.atc_limit: int = atc_limit
+        self.cis_limit: int = cis_limit
         self.gen_session_id_limit: int = gen_session_id_limit
         self.get_transaction_number_limit: int = get_transaction_number_limit
         self.submit_card_info_limit: int = submit_card_info_limit
@@ -125,6 +127,7 @@ class SettingsProfile:
         try:
             timeout = d["timeout"]
             atc_limit = d["atc_limit"]
+            cis_limit = d["cis_limit"]
             gen_session_id_limit = d["gen_session_id_limit"]
             get_transaction_number_limit = d["get_transaction_number_limit"]
             submit_card_info_limit = d["submit_card_info_limit"]
@@ -134,6 +137,7 @@ class SettingsProfile:
             return SettingsProfile(
                 timeout,
                 atc_limit,
+                cis_limit,
                 gen_session_id_limit,
                 get_transaction_number_limit,
                 submit_card_info_limit,

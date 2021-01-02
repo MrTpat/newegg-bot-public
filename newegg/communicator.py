@@ -23,6 +23,16 @@ class NeweggCommunicator:
         except:
             return False
 
+    def cart_is_not_empty(self, **kwargs) -> bool:
+        url = "https://secure.newegg.com/shop/cart"
+        try:
+            req = requests.get(url, cookies=self.cookies, timeout=self.timeout)
+            DebugLogger.log(f"Check cart url: {req.url}")
+            DebugLogger.log(f"Check cart status: {req.status_code}")
+            return "is empty" not in req.text
+        except:
+            return False
+
     @staticmethod
     def get_default_headers(new_entries: dict) -> dict:
         defaults = {

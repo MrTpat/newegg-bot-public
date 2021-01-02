@@ -53,16 +53,18 @@ class State(Enum):
     unstarted = 0
     trying_to_add_to_cart = 1
     added_to_cart = 2
-    generating_session_id = 3
-    generated_session_id = 4
-    getting_transaction_number = 5
-    got_transaction_number = 6
-    submitting_card_info = 7
-    submitted_card_info = 8
-    validating_address = 9
-    validated_address = 10
-    submitting_order = 11
-    submitted_order = 12
+    checking_cart_is_not_empty = 3
+    cart_is_not_empty = 4
+    generating_session_id = 5
+    generated_session_id = 6
+    getting_transaction_number = 7
+    got_transaction_number = 8
+    submitting_card_info = 9
+    submitted_card_info = 10
+    validating_address = 11
+    validated_address = 12
+    submitting_order = 13
+    submitted_order = 14
 
 
 class JobState:
@@ -160,6 +162,7 @@ class Job(threading.Thread):
     def run_test_subroutine(self, communicator: NeweggCommunicator) -> JobState:
         state: JobState = JobState(self)
         self.add_to_cart(communicator, state)
+        self.cart_is_not_empty(communicator, state)
         self.gen_session_id(communicator, state)
         self.get_transaction_number(communicator, state)
         self.submit_card_info(communicator, state)
@@ -169,6 +172,7 @@ class Job(threading.Thread):
     def run_real_subroutine(self, communicator: NeweggCommunicator) -> JobState:
         state: JobState = JobState(self)
         self.add_to_cart(communicator, state)
+        self.cart_is_not_empty(communicator, state)
         self.gen_session_id(communicator, state)
         self.get_transaction_number(communicator, state)
         self.submit_card_info(communicator, state)
@@ -184,6 +188,22 @@ class Job(threading.Thread):
                 communicator.add_to_cart,
                 atc_limit,
                 self.product_profile.__dict__,
+                False,
+            ):
+                state.kill()
+            else:
+                state.update(state.transaction_number, state.session_id)
+
+    def cart_is_not_empty(
+        self, communicator: NeweggCommunicator, state: JobState
+    ) -> None:
+        cis_limit = self.settings_profile.cis_limit
+        if state.is_alive():
+            state.update(state.transaction_number, state.session_id)
+            if not universal_function_limiter(
+                communicator.cart_is_not_empty,
+                cis_limit,
+                {},
                 False,
             ):
                 state.kill()
